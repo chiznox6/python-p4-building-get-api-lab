@@ -23,25 +23,27 @@ def index():
 # GET /bakeries
 @app.route('/bakeries')
 def bakeries():
-    bakeries = Bakery.query.all()
+    bakeries = db.session.query(Bakery).all()
     return jsonify([bakery.to_dict() for bakery in bakeries])
 
-# GET /bakeries/<id>
+# GET /bakeries/<id> (updated to avoid legacy warning)
 @app.route('/bakeries/<int:id>')
 def bakery_by_id(id):
-    bakery = Bakery.query.get_or_404(id)
+    bakery = db.session.get(Bakery, id)  # ✅ Updated from Bakery.query.get_or_404
+    if bakery is None:
+        return jsonify({"error": "Bakery not found"}), 404
     return jsonify(bakery.to_dict())
 
 # GET /baked_goods/by_price
 @app.route('/baked_goods/by_price')
 def baked_goods_by_price():
-    baked_goods = BakedGood.query.order_by(BakedGood.price.desc()).all()
+    baked_goods = db.session.query(BakedGood).order_by(BakedGood.price.desc()).all()
     return jsonify([bg.to_dict() for bg in baked_goods])
 
 # GET /baked_goods/most_expensive
 @app.route('/baked_goods/most_expensive')
 def most_expensive_baked_good():
-    baked_good = BakedGood.query.order_by(BakedGood.price.desc()).first()
+    baked_good = db.session.query(BakedGood).order_by(BakedGood.price.desc()).first()
     if baked_good:
         return jsonify(baked_good.to_dict())
     return jsonify({"error": "No baked goods found"}), 404
