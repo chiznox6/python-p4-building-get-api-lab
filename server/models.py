@@ -11,7 +11,9 @@ db = SQLAlchemy(metadata=metadata)
 class Bakery(db.Model, SerializerMixin):
     __tablename__ = 'bakeries'
 
+    # prevent recursion and define exact fields for JSON
     serialize_rules = ('-baked_goods.bakery',)
+    serialize_only = ('id', 'name', 'created_at', 'updated_at')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -23,10 +25,13 @@ class Bakery(db.Model, SerializerMixin):
     def __repr__(self):
         return f'<Bakery {self.name}>'
 
+
 class BakedGood(db.Model, SerializerMixin):
     __tablename__ = 'baked_goods'
 
+    # prevent recursion and define exact fields for JSON
     serialize_rules = ('-bakery.baked_goods',)
+    serialize_only = ('id', 'name', 'price', 'created_at', 'updated_at', 'bakery_id')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
